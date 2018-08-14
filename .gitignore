@@ -2,3 +2,10 @@
 venv/
 webview/__pycache__/
 error.log
+pos.dll
+posPama.record
+user.record
+backup/
+LOGS/
+Log.*
+xml/
