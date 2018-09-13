@@ -9,13 +9,14 @@ import win32gui
 hwnd = 0
 
 
-class Dialog(QWidget):
+class Dialog(QDialog):
     def __init__(self, params={
         'description': 'Description Info',
         'leftButtonText': 'Left Button',
         'rightButtonText': 'Right Button',
         'leftButtonAction': 'close',
-        'rightButtonAction': 'cancel'
+        'rightButtonAction': 'cancel',
+        'borderRadius': '50px'
     }):
         super(Dialog, self).__init__()
         self.m_drag = False
@@ -23,10 +24,10 @@ class Dialog(QWidget):
         self.params = params
         self.init()
         self.init_style()
-        self.show()
-        q = QEventLoop()
-        q.exec_()
-        # self.exec_()
+        # self.show()
+        # q = QEventLoop()
+        # q.exec_()
+        self.exec_()
 
     def init(self):
         action = {
@@ -35,6 +36,7 @@ class Dialog(QWidget):
         }
         self.resize(600, 200)
         self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowModality(Qt.ApplicationModal)
 
         v_layout = QVBoxLayout()
@@ -79,10 +81,14 @@ class Dialog(QWidget):
     def init_style(self):
         style = """
           QWidget [name="top_widget"] {
-            background-color: green;
+            background-color: blue;
+            border-top-left-radius: 20px;
+            border-top-right-radius:20px;
           }
           QWidget [name="bottom_widget"] {
-            background-color: #000;
+            background-color: black;
+            border-bottom-left-radius:20px;
+            border-bottom-right-radius:20px;
           }
           QPushButton {
             background-color: red;
@@ -94,7 +100,6 @@ class Dialog(QWidget):
              height: 50px;
           }
           QLabel {
-             background-color: blue;
              color: #fff;
              font-family: Microsoft YaHei;
              text-align: center;
