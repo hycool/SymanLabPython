@@ -9,17 +9,27 @@ import win32gui
 hwnd = 0
 
 
-class Dialog(QWidget):
-    def __init__(self, params={'leftButtonText': 'Left Button', 'rightButtonText': 'Right Button'}):
+class Dialog(QDialog):
+    def __init__(self, params={
+        'description': 'Description Info',
+        'leftButtonText': 'Left Button',
+        'rightButtonText': 'Right Button',
+        'leftButtonAction': 'close',
+        'rightButtonAction': 'cancel'
+    }):
         super(Dialog, self).__init__()
+        self.m_drag = False
+        self.m_DragPosition = 0
         self.params = params
         self.init()
-        self.style()
-        self.show()
-        q = QEventLoop()
-        q.exec_()
+        self.init_style()
+        self.exec_()
 
     def init(self):
+        action = {
+            'close': self.self_close,
+            'cancel': self.close
+        }
         self.resize(600, 200)
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setWindowModality(Qt.ApplicationModal)
@@ -31,17 +41,17 @@ class Dialog(QWidget):
         h_layout_top.setSpacing(0)
 
         h_layout_bottom = QHBoxLayout()
-        # h_layout_bottom.setContentsMargins(0, 0, 0, 0)
-        # h_layout_bottom.setSpacing(0)
-        h_layout_bottom.setAlignment(Qt.AlignJustify)
 
         dialog_description = QLabel()
-        dialog_description.setText('信息提示')
+        dialog_description.setText(self.params['description'])
         dialog_description.setAlignment(Qt.AlignCenter)
         h_layout_top.addWidget(dialog_description)
 
         left_button = QPushButton(self.params['leftButtonText'])
+        left_button.clicked.connect(action[self.params['leftButtonAction']])
         right_button = QPushButton(self.params['rightButtonText'])
+        right_button.clicked.connect(action[self.params['rightButtonAction']])
+
         h_layout_bottom.addStretch(1)
         h_layout_bottom.addWidget(left_button)
         h_layout_bottom.addStretch(1)
@@ -57,13 +67,13 @@ class Dialog(QWidget):
         top_widget.setLayout(h_layout_top)
         bottom_widget.setLayout(h_layout_bottom)
 
-        v_layout.addWidget(top_widget)
-        v_layout.addWidget(bottom_widget)
+        v_layout.addWidget(top_widget, 1)
+        v_layout.addWidget(bottom_widget, 2)
         v_layout.setSpacing(0)
         v_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(v_layout)
 
-    def style(self):
+    def init_style(self):
         style = """
           QWidget [name="top_widget"] {
             background-color: green;
@@ -89,6 +99,23 @@ class Dialog(QWidget):
            }
         """
         self.setStyleSheet(style)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.m_drag = True
+            self.m_DragPosition = event.globalPos() - self.pos()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if self.m_drag and event.buttons() and Qt.LeftButton:
+            self.move(event.globalPos() - self.m_DragPosition)
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        self.m_drag = False
+
+    def self_close(self):
+        self.close()
 
 
 class MainWindow(QWidget):
