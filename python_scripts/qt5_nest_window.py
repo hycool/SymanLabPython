@@ -3,6 +3,7 @@ import sys
 import subprocess
 import threading
 import win32gui
+import win32api
 import time
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -45,6 +46,7 @@ def launch_report():
     print('exe_path = ', exe_path)
     report_process = subprocess.Popen(exe_path)
     report_process_id = report_process.pid
+    print('report_process_id = ', report_process_id)
 
 
 class Report(QWidget):
@@ -72,14 +74,18 @@ if __name__ == '__main__':
 
     if nest_window:
         hwnd = get_handle_id()
-        print('main thread hwnd = ', hwnd)
         report_window = QWindow.fromWinId(get_handle_id())
-        report_window.showFullScreen()
-        print('report_window = ', int(report_window.winId()))
         window = Report(report_window)
-        window.resize(1500, 900)
-        window.setWindowTitle('The title of main window')
-        window.move(QApplication.desktop().availableGeometry().center() - window.rect().center())
-        window.show()
+        # window.resize(1500, 900)
+        # window.setWindowTitle('The title of main window')
+        # window.move(QApplication.desktop().availableGeometry().center() - window.rect().center())
+        # window.show()
+
+        main_window = QMainWindow()
+        main_window.setWindowTitle('主QMainWindow')
+        main_window.setCentralWidget(window)
+        main_window.resize(800, 800)
+        main_window.move(QApplication.desktop().availableGeometry().center() - main_window.rect().center())
+        main_window.show()
 
     sys.exit(app.exec_())

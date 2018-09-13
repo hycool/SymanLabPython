@@ -1,5 +1,6 @@
 import sys
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 from ctypes.wintypes import *
 import win32api
 import win32con
@@ -8,16 +9,104 @@ import win32gui
 hwnd = 0
 
 
+class Dialog(QWidget):
+    def __init__(self, params={'leftButtonText': 'Left Button', 'rightButtonText': 'Right Button'}):
+        super(Dialog, self).__init__()
+        self.params = params
+        self.init()
+        self.style()
+        self.show()
+        q = QEventLoop()
+        q.exec_()
+
+    def init(self):
+        self.resize(600, 200)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowModality(Qt.ApplicationModal)
+
+        v_layout = QVBoxLayout()
+
+        h_layout_top = QHBoxLayout()
+        h_layout_top.setContentsMargins(0, 0, 0, 0)
+        h_layout_top.setSpacing(0)
+
+        h_layout_bottom = QHBoxLayout()
+        # h_layout_bottom.setContentsMargins(0, 0, 0, 0)
+        # h_layout_bottom.setSpacing(0)
+        h_layout_bottom.setAlignment(Qt.AlignJustify)
+
+        dialog_description = QLabel()
+        dialog_description.setText('信息提示')
+        dialog_description.setAlignment(Qt.AlignCenter)
+        h_layout_top.addWidget(dialog_description)
+
+        left_button = QPushButton(self.params['leftButtonText'])
+        right_button = QPushButton(self.params['rightButtonText'])
+        h_layout_bottom.addStretch(1)
+        h_layout_bottom.addWidget(left_button)
+        h_layout_bottom.addStretch(1)
+        h_layout_bottom.addWidget(right_button)
+        h_layout_bottom.addStretch(1)
+
+        top_widget = QWidget()
+        top_widget.setProperty('name', 'top_widget')
+
+        bottom_widget = QWidget()
+        bottom_widget.setProperty('name', 'bottom_widget')
+
+        top_widget.setLayout(h_layout_top)
+        bottom_widget.setLayout(h_layout_bottom)
+
+        v_layout.addWidget(top_widget)
+        v_layout.addWidget(bottom_widget)
+        v_layout.setSpacing(0)
+        v_layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(v_layout)
+
+    def style(self):
+        style = """
+          QWidget [name="top_widget"] {
+            background-color: green;
+          }
+          QWidget [name="bottom_widget"] {
+            background-color: #000;
+          }
+          QPushButton {
+            background-color: red;
+             color: #fff;
+             font-family: Microsoft YaHei;
+             text-align: center;
+             border-radius: 5px;
+             width: 120px;
+             height: 50px;
+          }
+          QLabel {
+             background-color: blue;
+             color: #fff;
+             font-family: Microsoft YaHei;
+             text-align: center;
+             font-size: 25px;
+           }
+        """
+        self.setStyleSheet(style)
+
+
 class MainWindow(QWidget):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.init_layout()
 
+    @staticmethod
+    def show_dialog():
+        Dialog()
+
     def init_layout(self):
         w_layout = QHBoxLayout()
 
         h_layout = QHBoxLayout()
-        h_layout.addWidget(QPushButton(str(1)))
+        btn1 = QPushButton(str(1))
+        btn1.clicked.connect(self.show_dialog)
+        h_layout.addWidget(btn1)
         h_layout.addWidget(QPushButton(str(2)))
 
         v_layout = QVBoxLayout()
@@ -57,14 +146,14 @@ class MainWindow(QWidget):
         #  SendMessage(new IntPtr(StartupCommands.Hwnd), 0x9527, this.Handle, IntPtr.Zero);
         msg = ctypes.wintypes.MSG.from_address(message.__int__())
         # print(event_type, type(event_type))
-        print('window hwnd = ', hwnd)
+        # print('window hwnd = ', hwnd)
         # print('hwnd = ', msg.hWnd)
-        print("message: ", msg.message)
+        # print("message: ", msg.message)
         # print("pt: ", msg.pt)
         # print("time: ", msg.time)
-        print("wParam: ", msg.wParam, type(msg.wParam))
-        print("lParam: ", msg.lParam, type(msg.lParam))
-        print('------------------------------------')
+        # print("wParam: ", msg.wParam, type(msg.wParam))
+        # print("lParam: ", msg.lParam, type(msg.lParam))
+        # print('------------------------------------')
         return QWidget.nativeEvent(self, event_type, message)
 
 
@@ -72,7 +161,14 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     m = MainWindow()
     m.move(QApplication.desktop().availableGeometry().center() - m.rect().center())
+    m.setWindowTitle('this is a title')
     m.show()
+    m.show_dialog()
+
+    # m1 = MainWindow()
+    # m1.move(QApplication.desktop().availableGeometry().center() - m1.rect().center())
+    # m1.show()
+
     hwnd = int(m.winId())
     print('==============================', hwnd, '==============================')
 
