@@ -9,7 +9,7 @@ import win32gui
 hwnd = 0
 
 
-class Dialog(QDialog):
+class Dialog(QWidget):
     def __init__(self, params={
         'description': 'Description Info',
         'leftButtonText': 'Left Button',
@@ -23,7 +23,10 @@ class Dialog(QDialog):
         self.params = params
         self.init()
         self.init_style()
-        self.exec_()
+        self.show()
+        q = QEventLoop()
+        q.exec_()
+        # self.exec_()
 
     def init(self):
         action = {
